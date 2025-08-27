@@ -10,6 +10,11 @@
 #include "Python.h"
 #include "pycore_object.h"
 
+#ifdef _XBOX
+#define wcsncpy_s(dest, size, src, n) wcsncpy(dest, src, n)
+#define C3_HIGHSURROGATE 0xD800
+#endif
+
 #ifdef MS_WINDOWS
 
 #include "structmember.h"         // PyMemberDef

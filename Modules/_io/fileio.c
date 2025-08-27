@@ -1035,7 +1035,13 @@ _io_FileIO_truncate_impl(fileio *self, PyObject *posobj)
     _Py_BEGIN_SUPPRESS_IPH
     errno = 0;
 #ifdef MS_WINDOWS
+
+#ifdef _XBOX
+    ret = _chsize(fd, pos);
+#else
     ret = _chsize_s(fd, pos);
+#endif
+
 #else
     ret = ftruncate(fd, pos);
 #endif

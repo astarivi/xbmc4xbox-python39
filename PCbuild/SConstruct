@@ -1,0 +1,337 @@
+import os
+import hashlib
+
+env = Environment(
+    tools=['clang', 'mslink'],
+    CC='clang',
+    LINK='lld-link',
+    AR='llvm-lib',
+    SHLIBSUFFIX='.dll',
+    LIBSUFFIX='.lib'
+    # We don't inherit system ENV to avoid stdinc
+)
+
+INTERMEDIATE_DIR = 'objs'
+env['ENV']['PATH'] = os.environ['PATH']
+
+# Note: Only use forward slashes for paths, regardless of platform!!
+# Set the path to LSDK here, or copy it from system env if it's declared there:
+# env['LSDK'] = os.environ['LSDK']
+env['LSDK'] = 'F:/LSDK'
+env['ZLIB'] = '../../zlib-1.3.1'
+
+# Nuke these to avoid flag injection from SCons.
+env['SHCCFLAGS'] = []
+env['CCFLAGS'] = []
+env['CFLAGS'] = []
+env['LINKFLAGS'] = []
+env['CPPPATH'] = []
+env['CXXPATH'] = []
+env['LIBS'] = []
+env['LIBPATH'] = []
+
+# Clang flags.
+env.Append(CFLAGS=[
+    # Platform flags
+    '-target', 'i386-pc-win32', # Always needed when targeting the Xbox
+    '-march=pentium3',
+    "-fuse-ld=lld-link", # Tell Clang what linker will we use later
+    '-nostdinc', # Disable stdinc. These include the CRT on Windows, or glibc/musl on Linux
+    '-w', # FIXME: Hide warnings
+    '-std=c99',
+    '-fwrapv',
+
+    # Optimization flags
+    '-Os',
+    '-flto', # LTO will produce better performing binaries, but intermediate objects will be in LLVM bitcode
+    '-finline-functions'
+])
+
+env.Append(CPPDEFINES=[
+    '_DLL', # Define _DLL to enable /MD mode in MSVCRT
+
+    '_USRDLL',
+    'Py_BUILD_CORE',
+    'Py_BUILD_CORE_BUILTIN',
+    'Py_ENABLE_SHARED',
+    '_WIN32',
+    'Py_BUILD_CORE_MODULE',
+    'WIN32',
+    'MS_WINDOWS',
+    '_XBOX',
+#    'MS_DLL_ID=',
+
+    # We emulate VC 7.1 to avoid the WinXP headers from re-declaring intrinsincs
+    '_MAX_ENV=32767',
+    '_MSC_FULL_VER=13100000',
+    '_MSC_VER=1310'
+])
+
+env.Append(CPPPATH=[
+    # Source includes
+    '../Xbox',
+    '../Include',
+    '../Include/internal',
+    '../PC',
+    '$ZLIB',
+
+    "E:/msys64/mingw64/lib/clang/20/include", # With -nostdinc, we disabled intrinsics. Pull the clang include folder to enable them again.
+
+    # Include LSDK headers in the right order.
+    "$LSDK/VC7/include",
+    "$LSDK/VC7_PSDK/include",
+    "$LSDK/W2003_PSDK/include",
+#    "$LSDK/XDK/include"
+])
+
+env.Append(LINKFLAGS=[
+    "-subsystem:windows",
+    "-fixed",
+    "-base:0x1E000000", # Address call base for DLLs. Has to be 0x00010000 for XBEs!
+    "-merge:.edata=.edataxb",
+    "/nodefaultlib", # Disable UCRT
+    "/defaultlib:msvcrt.lib" # Link with defaultlib MSVCRT
+])
+
+env.Append(LIBS=[
+    "msvcrt.lib", # Pull MSVCRT as high priority
+    'kernel32.lib', # Include the WinXP 32b kernel. Replace with the Xbox kernel if targeting an XBE.
+    'wldap32.lib',
+    'ws2_32.lib',
+    'advapi32.lib',
+    'oldnames.lib', # Tired of renaming _vswprintf to vswprintf?
+])
+
+env.Append(LIBPATH=[
+    # Include LSDK libs in the right order.
+    "$LSDK/VC7/lib",
+    "$LSDK/VC7_PSDK/lib",
+    "$LSDK/W2003_PSDK/lib",
+#    "$LSDK/XDK/lib"
+])
+
+# Sources
+sources = [
+    "../Modules/pathcch.c",
+    "../Modules/_abc.c",
+    "../Modules/_bisectmodule.c",
+    "../Modules/_blake2/blake2module.c",
+    "../Modules/_blake2/blake2b_impl.c",
+    "../Modules/_blake2/blake2s_impl.c",
+    "../Modules/_codecsmodule.c",
+    "../Modules/_collectionsmodule.c",
+    "../Modules/_contextvarsmodule.c",
+    "../Modules/_csv.c",
+    "../Modules/_functoolsmodule.c",
+    "../Modules/_heapqmodule.c",
+    "../Modules/_json.c",
+    "../Modules/_localemodule.c",
+    "../Modules/_lsprof.c",
+    "../Modules/_math.c",
+    "../Modules/_pickle.c",
+    "../Modules/_randommodule.c",
+    "../Modules/_sha3/sha3module.c",
+    "../Modules/_sre.c",
+    "../Modules/_stat.c",
+    "../Modules/_struct.c",
+    "../Modules/_weakref.c",
+    "../Modules/arraymodule.c",
+    "../Modules/atexitmodule.c",
+    "../Modules/audioop.c",
+    "../Modules/binascii.c",
+    "../Modules/cmathmodule.c",
+    "../Modules/_datetimemodule.c",
+    "../Modules/errnomodule.c",
+    "../Modules/faulthandler.c",
+    "../Modules/gcmodule.c",
+    "../Modules/itertoolsmodule.c",
+    "../Modules/main.c",
+    "../Modules/mathmodule.c",
+    "../Modules/md5module.c",
+    "../Modules/mmapmodule.c",
+    "../Modules/_opcode.c",
+    "../Modules/_operator.c",
+    "../Modules/parsermodule.c",
+    "../Modules/_peg_parser.c",
+    "../Modules/posixmodule.c",
+    "../Modules/rotatingtree.c",
+    "../Modules/sha1module.c",
+    "../Modules/sha256module.c",
+    "../Modules/sha512module.c",
+    "../Modules/signalmodule.c",
+    "../Modules/_statisticsmodule.c",
+    "../Modules/symtablemodule.c",
+    "../Modules/_threadmodule.c",
+    "../Modules/_tracemalloc.c",
+    "../Modules/timemodule.c",
+    "../Modules/xxsubtype.c",
+    "../Modules/_xxsubinterpretersmodule.c",
+    "../Modules/_io/fileio.c",
+    "../Modules/_io/bytesio.c",
+    "../Modules/_io/stringio.c",
+    "../Modules/_io/bufferedio.c",
+    "../Modules/_io/iobase.c",
+    "../Modules/_io/textio.c",
+    "../Modules/_io/winconsoleio.c",
+    "../Modules/_io/_iomodule.c",
+    "../Modules/cjkcodecs/_codecs_cn.c",
+    "../Modules/cjkcodecs/_codecs_hk.c",
+    "../Modules/cjkcodecs/_codecs_iso2022.c",
+    "../Modules/cjkcodecs/_codecs_jp.c",
+    "../Modules/cjkcodecs/_codecs_kr.c",
+    "../Modules/cjkcodecs/_codecs_tw.c",
+    "../Modules/cjkcodecs/multibytecodec.c",
+    "../Modules/_winapi.c",
+    "../Objects/abstract.c",
+    "../Objects/accu.c",
+    "../Objects/boolobject.c",
+    "../Objects/bytearrayobject.c",
+    "../Objects/bytes_methods.c",
+    "../Objects/bytesobject.c",
+    "../Objects/call.c",
+    "../Objects/capsule.c",
+    "../Objects/cellobject.c",
+    "../Objects/classobject.c",
+    "../Objects/codeobject.c",
+    "../Objects/complexobject.c",
+    "../Objects/descrobject.c",
+    "../Objects/dictobject.c",
+    "../Objects/enumobject.c",
+    "../Objects/exceptions.c",
+    "../Objects/fileobject.c",
+    "../Objects/floatobject.c",
+    "../Objects/frameobject.c",
+    "../Objects/funcobject.c",
+    "../Objects/genericaliasobject.c",
+    "../Objects/genobject.c",
+    "../Objects/interpreteridobject.c",
+    "../Objects/iterobject.c",
+    "../Objects/listobject.c",
+    "../Objects/longobject.c",
+    "../Objects/memoryobject.c",
+    "../Objects/methodobject.c",
+    "../Objects/moduleobject.c",
+    "../Objects/namespaceobject.c",
+    "../Objects/object.c",
+    "../Objects/obmalloc.c",
+    "../Objects/odictobject.c",
+    "../Objects/picklebufobject.c",
+    "../Objects/rangeobject.c",
+    "../Objects/setobject.c",
+    "../Objects/sliceobject.c",
+    "../Objects/structseq.c",
+    "../Objects/tupleobject.c",
+    "../Objects/typeobject.c",
+    "../Objects/unicodectype.c",
+    "../Objects/unicodeobject.c",
+    "../Objects/weakrefobject.c",
+    "../Parser/acceler.c",
+    "../Parser/grammar1.c",
+    "../Parser/listnode.c",
+    "../Parser/myreadline.c",
+    "../Parser/node.c",
+    "../Parser/parser.c",
+    "../Parser/parsetok.c",
+    "../Parser/tokenizer.c",
+    "../Parser/token.c",
+    "../Parser/pegen/pegen.c",
+    "../Parser/pegen/parse.c",
+    "../Parser/pegen/parse_string.c",
+    "../Parser/pegen/peg_api.c",
+    "../PC/invalid_parameter_handler.c",
+    "../PC/winreg.c",
+    "../PC/config.c",
+    "../PC/getpathp.c",
+    "../PC/msvcrtmodule.c",
+    "../Python/pyhash.c",
+    "../Python/_warnings.c",
+    "../Python/asdl.c",
+    "../Python/ast.c",
+    "../Python/ast_opt.c",
+    "../Python/ast_unparse.c",
+    "../Python/bltinmodule.c",
+    "../Python/bootstrap_hash.c",
+    "../Python/ceval.c",
+    "../Python/codecs.c",
+    "../Python/compile.c",
+    "../Python/context.c",
+    "../Python/dynamic_annotations.c",
+    "../Python/dynload_win.c",
+    "../Python/errors.c",
+    "../Python/fileutils.c",
+    "../Python/formatter_unicode.c",
+    "../Python/frozen.c",
+    "../Python/future.c",
+    "../Python/getargs.c",
+    "../Python/getcompiler.c",
+    "../Python/getcopyright.c",
+    "../Python/getopt.c",
+    "../Python/getplatform.c",
+    "../Python/getversion.c",
+    "../Python/graminit.c",
+    "../Python/hamt.c",
+    "../Python/hashtable.c",
+    "../Python/import.c",
+    "../Python/importdl.c",
+    "../Python/initconfig.c",
+    "../Python/marshal.c",
+    "../Python/modsupport.c",
+    "../Python/mysnprintf.c",
+    "../Python/mystrtoul.c",
+    "../Python/pathconfig.c",
+    "../Python/peephole.c",
+    "../Python/preconfig.c",
+    "../Python/pyarena.c",
+    "../Python/pyctype.c",
+    "../Python/pyfpe.c",
+    "../Python/pylifecycle.c",
+    "../Python/pymath.c",
+    "../Python/pytime.c",
+    "../Python/pystate.c",
+    "../Python/pystrcmp.c",
+    "../Python/pystrhex.c",
+    "../Python/pystrtod.c",
+    "../Python/dtoa.c",
+    "../Python/Python-ast.c",
+    "../Python/pythonrun.c",
+    "../Python/structmember.c",
+    "../Python/symtable.c",
+    "../Python/sysmodule.c",
+    "../Python/thread.c",
+    "../Python/traceback.c",
+    
+    # ZLIB
+    "../Modules/zlibmodule.c",
+    "$ZLIB/adler32.c",
+    "$ZLIB/compress.c",
+    "$ZLIB/crc32.c",
+    "$ZLIB/deflate.c",
+    "$ZLIB/infback.c",
+    "$ZLIB/inffast.c",
+    "$ZLIB/inflate.c",
+    "$ZLIB/inftrees.c",
+    "$ZLIB/trees.c",
+    "$ZLIB/uncompr.c",
+    "$ZLIB/zutil.c",
+
+    "../PC/dl_nt.c",
+]
+
+objs = []
+
+# Compile sources to objs. This will mangle their names in expected ways.
+for src in sources:
+    base = os.path.splitext(os.path.basename(src))[0]
+    hash_suffix = hashlib.md5(src.encode()).hexdigest()[:8]
+    obj_name = f"{base}_{hash_suffix}"
+    # env.SharedObject is used for DLLs. Use env.Object for Libs.
+    obj = env.SharedObject(target=os.path.join(INTERMEDIATE_DIR, obj_name), source=src)
+    objs.append(obj)
+
+dll = env.SharedLibrary(
+    target='libcurl.dll',
+    source=objs,
+    WINDOWS_EXPORT_ALL_SYMBOLS=True # Do we need this?
+)
+
+Default(dll)

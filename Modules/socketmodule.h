@@ -251,7 +251,7 @@ typedef union sock_addr {
     struct sockaddr_rc bt_rc;
     struct sockaddr_sco bt_sco;
     struct sockaddr_hci bt_hci;
-#elif defined(MS_WINDOWS)
+#elif defined(MS_WINDOWS) && !defined(_XBOX) // Bluetooth on the xbox?. Huh?. That's a new one.
     struct SOCKADDR_BTH_REDEF bt_rc;
 #endif
 #ifdef HAVE_NETPACKET_PACKET_H

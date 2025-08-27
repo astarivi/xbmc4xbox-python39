@@ -52,10 +52,11 @@ static PyThread_type_lock tables_lock;
 
 /* Pack the frame_t structure to reduce the memory footprint on 64-bit
    architectures: 12 bytes instead of 16. */
+
 typedef struct
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(_XBOX)
 __attribute__((packed))
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && !defined(_XBOX)
 #pragma pack(push, 4)
 #endif
 {
@@ -63,8 +64,12 @@ __attribute__((packed))
        filename is NULL */
     PyObject *filename;
     unsigned int lineno;
-} frame_t;
-#ifdef _MSC_VER
+} 
+#ifdef _XBOX
+__attribute__((packed))
+#endif
+frame_t;
+#ifdef _MSC_VER && !defined(_XBOX)
 #pragma pack(pop)
 #endif
 

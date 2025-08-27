@@ -42,6 +42,10 @@
 #include <crtdbg.h>
 #include "winreparse.h"
 
+#ifdef _XBOX
+#include <winapi_stubs.h>
+#endif
+
 #if defined(MS_WIN32) && !defined(MS_WIN64)
 #define HANDLE_TO_PYNUM(handle) \
     PyLong_FromUnsignedLong((unsigned long) handle)
@@ -77,6 +81,11 @@ struct _PROC_THREAD_ATTRIBUTE_LIST
     DWORD_PTR unk;
     struct proc_thread_attr attrs[1];
 };
+
+#ifdef _XBOX
+typedef struct _PROC_THREAD_ATTRIBUTE_LIST *LPPROC_THREAD_ATTRIBUTE_LIST;
+#endif
+
 /***********************************************************************
  *           InitializeProcThreadAttributeList       (KERNEL32.@)
  */
@@ -1172,6 +1181,13 @@ Create a new process and its primary thread.
 The return value is a tuple of the process handle, thread handle,
 process ID, and thread ID.
 [clinic start generated code]*/
+
+#ifdef _XBOX
+typedef struct _STARTUPINFOEXW {
+    STARTUPINFOW StartupInfo;
+    LPPROC_THREAD_ATTRIBUTE_LIST lpAttributeList; 
+} STARTUPINFOEXW, *LPSTARTUPINFOEXW;
+#endif
 
 static PyObject *
 _winapi_CreateProcess_impl(PyObject *module,

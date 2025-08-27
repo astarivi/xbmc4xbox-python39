@@ -306,6 +306,7 @@ trip_signal(int sig_num)
         else
 #endif
         {
+#ifndef _XBOX
             /* _Py_write_noraise() retries write() if write() is interrupted by
                a signal (fails with EINTR). */
             rc = _Py_write_noraise(fd, &byte, 1);
@@ -321,6 +322,10 @@ trip_signal(int sig_num)
                                            (void *)(intptr_t)errno);
                 }
             }
+#else
+            // Yabai.
+            fprintf(stderr, "[DEBUG] Write would block: fd=%d, errno=%d\n", fd, errno);
+#endif
         }
     }
 }

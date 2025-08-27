@@ -5,6 +5,10 @@
 #include <float.h>
 #include "_math.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* The following copyright notice applies to the original
    implementations of acosh, asinh and atanh. */
 

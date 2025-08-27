@@ -2246,7 +2246,12 @@ _Py_GetLocaleconvNumeric(struct lconv *lc,
 #define GET_LOCALE_STRING(ATTR) PyUnicode_DecodeLocale(lc->ATTR, NULL)
 #else /* MS_WINDOWS */
 /* Use _W_* fields of Windows strcut lconv */
+#ifdef _XBOX
+#define GET_LOCALE_STRING(ATTR) PyUnicode_FromString(lc->ATTR)
+#else
 #define GET_LOCALE_STRING(ATTR) PyUnicode_FromWideChar(lc->_W_ ## ATTR, -1)
+#endif
+
 #endif /* MS_WINDOWS */
 
     int res = -1;

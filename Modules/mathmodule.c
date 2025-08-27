@@ -56,6 +56,11 @@ raised for division by zero and mod by zero.
 #include "pycore_dtoa.h"
 #include "_math.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#define nextafter(x, y) _nextafter(x, y)
+#endif
+
 #include "clinic/mathmodule.c.h"
 
 /*[clinic input]

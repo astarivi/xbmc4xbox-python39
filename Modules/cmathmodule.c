@@ -9,6 +9,10 @@
    float.h.  We assume that FLT_RADIX is either 2 or 16. */
 #include <float.h>
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 #include "clinic/cmathmodule.c.h"
 /*[clinic input]
 module cmath
