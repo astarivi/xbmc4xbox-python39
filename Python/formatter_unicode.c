@@ -6,6 +6,10 @@
 #include "pycore_fileutils.h"
 #include <locale.h>
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* Raises an exception about an unknown presentation type for this
  * type. */
 

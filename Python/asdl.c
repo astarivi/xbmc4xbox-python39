@@ -1,6 +1,10 @@
 #include "Python.h"
 #include "asdl.h"
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 asdl_seq *
 _Py_asdl_seq_new(Py_ssize_t size, PyArena *arena)
 {

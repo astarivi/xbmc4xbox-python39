@@ -6,6 +6,10 @@
 #include "frameobject.h"          // PyFrame_GetBack()
 #include "clinic/_warnings.c.h"
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 #define MODULE_NAME "_warnings"
 
 PyDoc_STRVAR(warnings__doc__,

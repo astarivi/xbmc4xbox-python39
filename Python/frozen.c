@@ -6,6 +6,10 @@
 #include "importlib_external.h"
 #include "importlib_zipimport.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* In order to test the support for frozen modules, by default we
    define a single frozen module, __hello__.  Loading it will print
    some famous words... */

@@ -32,6 +32,10 @@
 
 #include <ctype.h>
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 #ifdef Py_DEBUG
 /* For debugging the interpreter: */
 #define LLTRACE  1      /* Low-level trace feature */

@@ -10,6 +10,10 @@
 #include "pycore_tupleobject.h"
 #include "clinic/codeobject.c.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* Holder for co_extra information */
 typedef struct {
     Py_ssize_t ce_size;

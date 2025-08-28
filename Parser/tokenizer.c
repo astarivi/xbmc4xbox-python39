@@ -16,6 +16,10 @@
 #include "codecs.h"
 #include "abstract.h"
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 /* Alternate tab spacing */
 #define ALTTABSIZE 1
 

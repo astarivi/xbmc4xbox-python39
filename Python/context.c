@@ -13,6 +13,9 @@
 static PyContext *ctx_freelist = NULL;
 static int ctx_freelist_len = 0;
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
 
 #include "clinic/context.c.h"
 /*[clinic input]

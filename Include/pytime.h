@@ -5,6 +5,10 @@
 #include "pyconfig.h" /* include for defines */
 #include "object.h"
 
+#ifdef _XBOX
+struct timeval;
+#endif
+
 /**************************************************************************
 Symbols and macros to supply platform-independent interfaces to time related
 functions and constants

@@ -172,6 +172,9 @@ typedef _W64 int ssize_t;
 #endif
 #define HAVE_SSIZE_T 1
 
+#ifdef _XBOX
+#define COMPILER "\n[Clang i386-win32 MSVC compat " __clang_version__ "]"
+#else
 #if defined(MS_WIN32) && !defined(MS_WIN64)
 #if defined(_M_IX86)
 #if defined(__INTEL_COMPILER)
@@ -187,6 +190,7 @@ typedef _W64 int ssize_t;
 #define COMPILER _Py_PASTE_VERSION("32 bit (Unknown)")
 #endif
 #endif /* MS_WIN32 && !MS_WIN64 */
+#endif
 
 typedef int pid_t;
 

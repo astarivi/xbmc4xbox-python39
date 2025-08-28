@@ -102,6 +102,19 @@
 
 #include <string.h>
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+// FIXME: DIRTY FIX!: We need to check this!
+#   define _wputenv_s(var, val) \
+        do { \
+            wchar_t _envbuf[256]; \
+            swprintf(_envbuf, L"%s=%s", var, val); \
+            _wputenv(_envbuf); \
+        } while(0)
+
+    typedef int errno_t;
+#endif
+
 /* Search in some common locations for the associated Python libraries.
  *
  * Py_GetPath() tries to return a sensible Python module search path.

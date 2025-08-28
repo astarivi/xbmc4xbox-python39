@@ -7,6 +7,10 @@
 #include "symtable.h"
 #include "ast.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 #define UNDEFINED_FUTURE_FEATURE "future feature %.100s is not defined"
 #define ERR_LATE_FUTURE \
 "from __future__ imports must occur at the beginning of the file"

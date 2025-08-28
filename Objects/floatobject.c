@@ -16,6 +16,10 @@ class float "PyObject *" "&PyFloat_Type"
 
 #include "clinic/floatobject.c.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* Special free list
    free_list is a singly-linked list of available PyFloatObjects, linked
    via abuse of their ob_type members.

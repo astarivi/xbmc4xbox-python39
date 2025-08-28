@@ -426,20 +426,21 @@ extern "C" {
     unsigned int old_387controlword, new_387controlword, out_387controlword
 /* We use the __control87_2 function to set only the x87 control word.
    The SSE control word is unaffected. */
-#define _Py_SET_53BIT_PRECISION_START                                   \
-    do {                                                                \
-        __control87_2(0, 0, &old_387controlword, NULL);                 \
-        new_387controlword =                                            \
-          (old_387controlword & ~(_MCW_PC | _MCW_RC)) | (_PC_53 | _RC_NEAR); \
-        if (new_387controlword != old_387controlword)                   \
-            __control87_2(new_387controlword, _MCW_PC | _MCW_RC,        \
-                          &out_387controlword, NULL);                   \
+
+// FIXME: SSE control word not considered. Should we?
+#define _Py_SET_53BIT_PRECISION_START                        \
+    do {                                                     \
+        old_387controlword = _control87(0, 0);              \
+        new_387controlword =                                  \
+            (old_387controlword & ~(_MCW_PC | _MCW_RC)) | (_PC_53 | _RC_NEAR); \
+        if (new_387controlword != old_387controlword)       \
+            _control87(new_387controlword, _MCW_PC | _MCW_RC); \
     } while (0)
-#define _Py_SET_53BIT_PRECISION_END                                     \
-    do {                                                                \
-        if (new_387controlword != old_387controlword)                   \
-            __control87_2(old_387controlword, _MCW_PC | _MCW_RC,        \
-                          &out_387controlword, NULL);                   \
+
+#define _Py_SET_53BIT_PRECISION_END                          \
+    do {                                                     \
+        if (new_387controlword != old_387controlword)       \
+            _control87(old_387controlword, _MCW_PC | _MCW_RC); \
     } while (0)
 #endif
 

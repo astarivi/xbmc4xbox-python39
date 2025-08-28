@@ -28,6 +28,9 @@
 #  error "PLATLIBDIR macro must be defined"
 #endif
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
 
 /* --- Command line options --------------------------------------- */
 

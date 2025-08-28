@@ -25,6 +25,10 @@ extern int winerror_to_errno(int);
 #include <fcntl.h>
 #endif /* HAVE_FCNTL_H */
 
+#ifndef IO_REPARSE_TAG_SYMLINK
+#   define IO_REPARSE_TAG_SYMLINK (0xA000000CL)
+#endif
+
 #ifdef O_CLOEXEC
 /* Does open() support the O_CLOEXEC flag? Possible values:
 

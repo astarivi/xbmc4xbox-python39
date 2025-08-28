@@ -3,6 +3,21 @@
 #include <winsock2.h>         /* struct timeval */
 #endif
 
+#ifdef _XBOX
+static int localtime_s(struct tm *tm, const time_t *t) {
+    struct tm *tmp = localtime(t);
+    if (!tmp) return -1;
+    *tm = *tmp;
+    return 0;
+}
+static int gmtime_s(struct tm *tm, const time_t *t) {
+    struct tm *tmp = gmtime(t);
+    if (!tmp) return -1;
+    *tm = *tmp;
+    return 0;
+}
+#endif
+
 #if defined(__APPLE__)
 #include <mach/mach_time.h>   /* mach_absolute_time(), mach_timebase_info() */
 

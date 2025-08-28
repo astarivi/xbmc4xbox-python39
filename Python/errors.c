@@ -22,6 +22,10 @@ extern char *strerror(int);
 
 #include <ctype.h>
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

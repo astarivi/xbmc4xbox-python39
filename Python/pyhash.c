@@ -13,6 +13,10 @@
 #  include <sys/endian.h>
 #endif
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

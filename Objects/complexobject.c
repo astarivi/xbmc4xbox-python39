@@ -15,6 +15,10 @@ class complex "PyComplexObject *" "&PyComplex_Type"
 
 #include "clinic/complexobject.c.h"
 
+#ifdef _XBOX
+#define copysign _copysign
+#endif
+
 /* elementary operations on complex numbers */
 
 static Py_complex c_1 = {1., 0.};

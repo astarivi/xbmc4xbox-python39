@@ -3,6 +3,10 @@
 #include "Python.h"
 #include "token.h"
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
+
 /* Token names */
 
 const char * const _PyParser_TokenNames[] = {

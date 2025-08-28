@@ -21,26 +21,11 @@
 #  include <pathcch.h>
 #endif
 
-// FIXME: Extremely unsafe.
 #ifdef _XBOX
-    static int wcscpy_s_wrapper(wchar_t *dest, size_t size, const wchar_t *src) {
-        wcscpy(dest, src);   // ignore length for Xbox
-        return 0;
-    }
-
-    static int wcscat_s_wrapper(wchar_t *dest, size_t size, const wchar_t *src) {
-        wcscat(dest, src);   // ignore length for Xbox
-        return 0;
-    }
-
-    #define wcscpy_s(dest, size, src) wcscpy_s_wrapper(dest, size, src)
-    #define wcscat_s(dest, size, src) wcscat_s_wrapper(dest, size, src)
-    #define wcsncpy_s(dest, size, src, n) wcsncpy(dest, src, n)
-    #define wcsnlen_s(src, maxlen) wcslen(src)
-    #define _chsize_s(fd, length) _chsize(fd, (long)(length))
-    #define SYMBOLIC_LINK_FLAG_DIRECTORY 0
+#   include <x_wrappers.h>
+#   define SYMBOLIC_LINK_FLAG_DIRECTORY 0
     typedef struct { DWORD ReparseTag; } FILE_ATTRIBUTE_TAG_INFO;
-    #define VOLUME_NAME_DOS 0
+#   define VOLUME_NAME_DOS 0
 #endif
 
 #include "pycore_ceval.h"         // _PyEval_ReInitThreads()

@@ -17,6 +17,16 @@
 #include "structmember.h"         // PyMemberDef
 #include <windows.h>
 
+#ifdef _XBOX
+// FIXME: Another weird implementation here. But we never use the registry... right?
+static size_t wcsnlen(const wchar_t *s, size_t maxlen)
+{
+    size_t len = 0;
+    while (len < maxlen && s[len] != L'\0') len++;
+    return len;
+}
+#endif
+
 static BOOL PyHKEY_AsHKEY(PyObject *ob, HKEY *pRes, BOOL bNoneOK);
 static BOOL clinic_HKEY_converter(PyObject *ob, void *p);
 static PyObject *PyHKEY_FromHKEY(HKEY h);

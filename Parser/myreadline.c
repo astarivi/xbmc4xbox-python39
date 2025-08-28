@@ -16,6 +16,9 @@
 #  include "windows.h"
 #endif /* MS_WINDOWS */
 
+#ifdef _XBOX
+#   include <x_wrappers.h>
+#endif
 
 PyThreadState* _PyOS_ReadlineTState = NULL;
 
